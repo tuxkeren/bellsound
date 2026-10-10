@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# PyInstaller
+build/
+dist/
+*.spec
+
+# BellSound runtime (mode portable)
+data/
+bellsound.portable
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+*.log

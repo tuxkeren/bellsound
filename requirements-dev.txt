@@ -1,0 +1,3 @@
+# Dependensi untuk membangun aplikasi menjadi executable
+-r requirements.txt
+pyinstaller>=6.11

@@ -1,0 +1,4 @@
+# Dependensi runtime BellSound
+# pygame-ce adalah drop-in replacement pygame (import tetap "pygame")
+# dan menyediakan wheel untuk Python 3.14.
+pygame-ce>=2.5.0
