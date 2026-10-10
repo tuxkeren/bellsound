@@ -10,6 +10,16 @@ Aplikasi berjalan terus dan **tidak dapat ditutup tanpa password**. Tampilan
 dibuat modern dan profesional, serta siap di-compile menjadi executable
 menggunakan PyInstaller.
 
+## Tangkapan Layar
+
+![Dashboard BellSound](screenshot-dashboard.png)
+
+*Dashboard — bell berikutnya dan jadwal hari ini.*
+
+![Halaman Jadwal Bell](screenshot-jadwal.png)
+
+*Halaman Jadwal Bell — atur bell per jam dan hari.*
+
 ## Fitur
 
 - **Kategori bell**: Bell Masuk, Bell Istirahat, Kopi Break, Bell Pulang, dan
