@@ -121,3 +121,7 @@ bellsound/
 Aplikasi terbuka dalam **mode layar penuh** secara default. Tekan **Esc** untuk
 beralih ke mode jendela, dan tekan **Esc** lagi untuk kembali ke layar penuh.
 
+## Lisensi
+
+Dirilis dengan lisensi **MIT** — lihat berkas [LICENSE](LICENSE).
+
