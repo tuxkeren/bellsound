@@ -15,6 +15,16 @@ dist/
 data/
 bellsound.portable
 
+# BellSound user data
+db/
+
+# Audio files
+sounds/*.mp3
+sounds/*.wav
+sounds/*.ogg
+sounds/*.flac
+sounds/*.m4a
+
 # Editor / OS
 .idea/
 .vscode/

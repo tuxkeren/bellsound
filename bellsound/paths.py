@@ -62,3 +62,19 @@ def history_path() -> Path:
 
 def log_path() -> Path:
     return data_dir() / "bellsound.log"
+
+
+def sound_path(filename: str = "japan-bell.mp3") -> Path:
+    """Path ke file sound default (relative path konversi ke absolute)."""
+    return app_dir() / "sounds" / filename
+
+
+def resolve_sound_path(path: str) -> str:
+    """Konversi path sound (relatif atau absolut) ke absolute path."""
+    if not path:
+        return ""
+    p = Path(path)
+    if p.is_absolute():
+        return str(p.resolve())
+    # Path relatif - konversi ke absolute relatif ke app_dir
+    return str((app_dir() / path).resolve())

@@ -60,6 +60,9 @@ class BellEvent:
     loop: bool = True
     volume: Optional[float] = None
     enabled: bool = True
+    # Cutback/reject time fields for Friday breaks
+    cutback_time: Optional[str] = None  # Waktu istirahat berakhir (mis: "11:30" untuk Jumat)
+    reject_time: Optional[str] = None  # Waktu istirahat mulai (mis: "13:30" untuk Jumat)
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -93,6 +96,8 @@ class BellEvent:
             loop=bool(data.get("loop", True)),
             volume=data.get("volume"),
             enabled=bool(data.get("enabled", True)),
+            cutback_time=data.get("cutback_time"),
+            reject_time=data.get("reject_time"),
         )
 
 

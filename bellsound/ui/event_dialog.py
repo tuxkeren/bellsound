@@ -14,6 +14,7 @@ from ..models import (
     KINDS,
     BellEvent,
 )
+from ..paths import resolve_sound_path
 from .dialogs import Modal, make_entry
 from .theme import Palette, ui_font
 from .widgets import RoundedButton, Toggle
@@ -183,6 +184,30 @@ class EventDialog(Modal):
                                         self._loop, self._on_loop)
         self.enabled_toggle = self._option(option_row, "Aktifkan jadwal ini", self._enabled)
 
+        # Cutback/Reject time for Friday breaks
+        break_row = tk.Frame(container, bg=Palette.SURFACE)
+        break_row.pack(fill="x", pady=(8, 0))
+        tk.Label(break_row, text="Cutback/Reject (Jumat):", bg=Palette.SURFACE, fg=Palette.TEXT_MUTED,
+                 font=ui_font(10), anchor="w").pack(anchor="w")
+        
+        cutback_frame = tk.Frame(break_row, bg=Palette.SURFACE)
+        cutback_frame.pack(fill="x", pady=(4, 0))
+        tk.Label(cutback_frame, text="Keluar istirahat:", bg=Palette.SURFACE, fg=Palette.TEXT,
+                 font=ui_font(9)).pack(side="left")
+        cb_parts = (self.event.cutback_time or "").split(":") if self.event.cutback_time else None
+        self.cutback_hour = self._spin(cutback_frame, 0, 23, cb_parts[0] if cb_parts and cb_parts[0] else "11")
+        tk.Label(cutback_frame, text=":", bg=Palette.SURFACE, fg=Palette.TEXT, font=ui_font(18, "bold")).pack(side="left", padx=4)
+        self.cutback_minute = self._spin(cutback_frame, 0, 59, cb_parts[1] if cb_parts and len(cb_parts) > 1 else "30")
+
+        reject_frame = tk.Frame(break_row, bg=Palette.SURFACE)
+        reject_frame.pack(fill="x", pady=(4, 0))
+        tk.Label(reject_frame, text="Masuk kembali:", bg=Palette.SURFACE, fg=Palette.TEXT,
+                 font=ui_font(9)).pack(side="left")
+        rj_parts = (self.event.reject_time or "").split(":") if self.event.reject_time else None
+        self.reject_hour = self._spin(reject_frame, 0, 23, rj_parts[0] if rj_parts and rj_parts[0] else "13")
+        tk.Label(reject_frame, text=":", bg=Palette.SURFACE, fg=Palette.TEXT, font=ui_font(18, "bold")).pack(side="left", padx=4)
+        self.reject_minute = self._spin(reject_frame, 0, 59, rj_parts[1] if rj_parts and len(rj_parts) > 1 else "30")
+
         # Buttons
         buttons = tk.Frame(container, bg=Palette.SURFACE)
         buttons.pack(fill="x", side="bottom", pady=(16, 0))
@@ -294,9 +319,10 @@ class EventDialog(Modal):
         path = self._sound_var.get()
         if not path:
             return
+        resolved_path = resolve_sound_path(path)
         volume = float(self.volume.get()) / 100.0
         self._player.play(
-            path,
+            resolved_path,
             duration=self._selected_duration,
             loop=bool(self._loop.get()),
             volume=volume,
@@ -326,6 +352,17 @@ class EventDialog(Modal):
         self.event.loop = bool(self._loop.get()) and self._selected_duration is not None
         self.event.volume = float(self.volume.get()) / 100.0
         self.event.enabled = bool(self._enabled.get())
+        
+        # Set cutback/reject times for Friday breaks
+        try:
+            cb_hour = int(float(self.cutback_hour.get()))
+            cb_min = int(float(self.cutback_minute.get()))
+            rj_hour = int(float(self.reject_hour.get()))
+            rj_min = int(float(self.reject_minute.get()))
+            self.event.cutback_time = f"{cb_hour:02d}:{cb_min:02d}"
+            self.event.reject_time = f"{rj_hour:02d}:{rj_min:02d}"
+        except (ValueError, TypeError):
+            pass
 
         self._player.stop()
         self._result = self.event

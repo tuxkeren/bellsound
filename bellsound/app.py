@@ -9,9 +9,9 @@ import tkinter as tk
 from typing import Dict, Optional
 
 from . import APP_SUBTITLE, APP_TITLE, AUTHOR, __version__
-from .config import Config
+from .config import Config, DEFAULT_PASSWORD
 from .models import Profile, BellEvent
-from .paths import history_path, log_path
+from .paths import history_path, log_path, resolve_sound_path
 from .player import AudioPlayer
 from .scheduler import BellScheduler
 from .security import verify_password as _verify
@@ -114,9 +114,9 @@ class App(tk.Tk):
             self.after(300, self.lock)
         if self.cfg.get("start_minimized"):
             self.after(300, self.iconify)
-        if self.verify_password("admin123"):
+        if self.verify_password(DEFAULT_PASSWORD):
             self.after(1200, lambda: self.show_toast(
-                "Password masih default (admin123). Segera ubah di Pengaturan.", "warning"))
+                f"Password masih default ({DEFAULT_PASSWORD}). Segera ubah di Pengaturan.", "warning"))
 
     # -------------------------------------------------------------- layout
     def _build_layout(self):
@@ -269,11 +269,12 @@ class App(tk.Tk):
 
     # ------------------------------------------------------------- playback
     def play_event(self, event: BellEvent, manual: bool = False):
-        if not event.sound or not os.path.isfile(event.sound):
+        sound_path = resolve_sound_path(event.sound) if event.sound else ""
+        if not sound_path or not os.path.isfile(sound_path):
             self.show_toast(f"File suara untuk '{event.name}' belum diatur.", "error")
             return
         volume = event.volume if event.volume is not None else self.cfg.volume
-        ok = self.player.play(event.sound, duration=event.duration, loop=event.loop, volume=volume)
+        ok = self.player.play(sound_path, duration=event.duration, loop=event.loop, volume=volume)
         if ok:
             self.last_bell = {
                 "name": event.name,
@@ -291,13 +292,14 @@ class App(tk.Tk):
         self._update_audio_status()
 
     def _on_bell_trigger(self, event: BellEvent, profile: Profile, when: dt.datetime):
-        if not event.sound or not os.path.isfile(event.sound):
+        sound_path = resolve_sound_path(event.sound) if event.sound else ""
+        if not sound_path or not os.path.isfile(sound_path):
             self._record_history(event, "file tidak ada", profile=profile)
             self.show_toast(f"Bell '{event.name}' dilewati: file suara tidak ada.", "error")
             self._refresh_current()
             return
         volume = event.volume if event.volume is not None else self.cfg.volume
-        ok = self.player.play(event.sound, duration=event.duration, loop=event.loop, volume=volume)
+        ok = self.player.play(sound_path, duration=event.duration, loop=event.loop, volume=volume)
         status = "diputar" if ok else "gagal"
         self.last_bell = {
             "name": event.name,
