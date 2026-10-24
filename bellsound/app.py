@@ -544,9 +544,54 @@ class App(tk.Tk):
         except Exception:
             pass
 
+    def _auto_switch_profile(self):
+        """Otomatis ganti profil berdasarkan hari. Jumat pakai profil _friday."""
+        now = dt.datetime.now()
+        weekday = now.weekday()  # 0=Mon, 4=Fri, 6=Sun
+        
+        current_key = self.cfg.active_profile_key
+        profile_keys = self.cfg.profile_keys()
+        
+        # Temukan pasangan profil friday untuk hari Jumat
+        # Format: normal <-> normal_friday, ramadhan <-> ramadhan_friday
+        friday_key = None
+        normal_key = None
+        
+        # Cari profil friday yang cocok dengan profile aktif
+        if current_key.endswith("_friday"):
+            # Saat ini pakai profil friday, cari pasangannya (non-friday)
+            normal_key = current_key[:-7] if len(current_key) > 7 else None
+        else:
+            # Saat ini pakai profil normal, cari pasangannya (friday)
+            friday_key = current_key + "_friday" if current_key else None
+        
+        for key in profile_keys:
+            if friday_key and key == friday_key:
+                friday_key = key
+                break
+            if normal_key and key == normal_key:
+                normal_key = key
+                break
+        
+        # Ganti profil jika perlu
+        if weekday == 4 and friday_key and current_key != friday_key:
+            self.set_active_profile(friday_key)
+            profile = self.cfg.get_profile(friday_key)
+            if profile:
+                self.show_toast(f"Otomatis pakai profil '{profile.name}'", "info")
+        elif weekday != 4 and normal_key and current_key != normal_key:
+            self.set_active_profile(normal_key)
+            profile = self.cfg.get_profile(normal_key)
+            if profile:
+                self.show_toast(f"Otomatis pakai profil '{profile.name}'", "info")
+
     def _tick(self):
         now = dt.datetime.now()
         self.top_clock.configure(text=now.strftime("%H:%M:%S"))
+        
+        # Auto-switch profile based on day of week
+        self._auto_switch_profile()
+        
         try:
             self.scheduler.tick(now)
         except Exception as exc:
